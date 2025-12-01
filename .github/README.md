@@ -22,7 +22,7 @@ Para que os testes automatizados funcionem, você precisa configurar os seguinte
 | `EVOLUTION_API_URL` | URL da API Evolution | `https://api.omnigalaxy.brainesscompany.com.br/manager/instance` |
 | `EVOLUTION_API_KEY` | Chave da API | `1B68D5DA-A8FA-43E9-8D8A-6F6963AE4B11` |
 | `EVOLUTION_INSTANCE` | Nome da instância | `brainess` |
-| `DISCORD_WEBHOOK_URL` | URL do webhook Discord | `https://discord.com/api/webhooks/...` |
+| `DISCORD_WEBHOOK_URL` | URL do webhook Discord | `https://discord.com/api/webhooks/1445099446370041887/SG7HrdeEVpzEnvzGLYRym3T9lTStDd1T-rYOwTa-hF79HkBhjHFRc-ObOhayThl6FrMX` |
 | `WHATSAPP_NUMBER` | Número WhatsApp (opcional) | `5511999999999` |
 
 ### Como Obter o Webhook do Discord
@@ -45,7 +45,7 @@ Os testes são executados automaticamente:
 ### Resultados dos Testes
 
 - ✅ **Sucesso**: Os testes passaram e nenhuma notificação é enviada
-- ❌ **Falha**: Os testes falharam e uma notificação é enviada para o Discord com:
+- ❌ **Falha**: Os testes falharam e uma notificação é enviada para o Discord com `@everyone` incluindo:
   - Informações do commit (hash, autor, data, mensagem)
   - Resumo completo dos testes
   - Detalhes dos erros
