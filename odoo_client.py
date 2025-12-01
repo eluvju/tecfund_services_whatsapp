@@ -156,3 +156,4 @@ class OdooClient:
             logger.error(f"Erro ao buscar detalhes do lançamento {move_id}: {e}")
             return None
 
+

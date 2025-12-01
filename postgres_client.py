@@ -295,3 +295,4 @@ class PostgresClient:
         """Context manager exit"""
         self.close()
 
+

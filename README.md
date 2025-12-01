@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Sistema de Notificação WhatsApp para Odoo
 
 Sistema automatizado que monitora lançamentos no Odoo e envia notificações via WhatsApp usando a Evolution API.
@@ -231,3 +232,6 @@ Este projeto foi desenvolvido para uso interno.
 
 Para problemas ou dúvidas, verifique os logs do sistema ou entre em contato com a equipe de desenvolvimento.
 
+=======
+# tecfund_services_whatsapp
+>>>>>>> 694a47d07d6bd7d4d6c05c1bb48beebbf7fed695
