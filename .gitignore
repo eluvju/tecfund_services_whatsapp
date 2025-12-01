@@ -30,7 +30,8 @@ env/
 
 # Arquivos de log
 *.log
-odoo_whatsapp_notifier.log
+accounts_receivable_notifier.log
+test_output.txt
 
 # Arquivos de configuração local
 .env
