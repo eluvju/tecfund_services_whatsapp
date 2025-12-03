@@ -5,8 +5,14 @@ builder = "nixpacks"
 startCommand = "python main.py"
 
 # Cron Jobs - Horários em UTC
-# 7:30 AM horário de Brasília (UTC-3) = 10:30 UTC
-# 5:30 PM horário de Brasília (UTC-3) = 8:30 PM UTC
+# 6:00 AM horário de Brasília (UTC-3) = 9:00 UTC - Health Check
+# 7:30 AM horário de Brasília (UTC-3) = 10:30 UTC - Dispatchers
+# 5:30 PM horário de Brasília (UTC-3) = 8:30 PM UTC - Compras
+
+# Health Check - Roda antes dos outros jobs para validar o sistema
+[[cron]]
+schedule = "0 9 * * *"
+command = "python scripts/health_check.py"
 
 [[cron]]
 schedule = "30 10 * * *"

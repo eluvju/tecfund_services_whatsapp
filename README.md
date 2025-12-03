@@ -11,8 +11,8 @@ Sistema automatizado que dispara notificações via WhatsApp sobre contas a rece
 - ✅ Notificações formatadas com informações detalhadas
 - ✅ Configurado para deploy no Railway com cron jobs
 - ✅ Logging completo de todas as operações
-- ✅ Testes automatizados via GitHub Actions
-- ✅ Notificações Discord em caso de falha dos testes
+- ✅ Health Check diário com testes automatizados no Railway
+- ✅ Notificações Discord em caso de falha
 
 ## 📋 Pré-requisitos
 
@@ -187,65 +187,56 @@ Você pode criar um arquivo `railway.toml` na raiz do projeto. Veja exemplo em `
 - **17:30** (horário de Brasília): 
   - Compras atualizadas no dia
 
-## 🔍 Monitoramento
+## 🔍 Monitoramento e Testes
 
-O sistema mantém logs detalhados:
-- Logs são exibidos no console/stdout
-- No Railway, os logs podem ser visualizados no painel de cada cron job
-- Logs incluem informações sobre conexões, buscas e envios
+O sistema utiliza o Railway para testes e monitoramento, garantindo que os testes sejam executados no mesmo ambiente de produção.
 
-## 🧪 Testes Automatizados
+### Health Check Diário
 
-O projeto inclui testes automatizados executados via GitHub Actions:
+Um cron job executa diariamente às **6:00 AM** (horário de Brasília) para validar todo o sistema:
 
-### Execução Automática
+- ✅ Importação de todos os módulos
+- ✅ Configurações de variáveis de ambiente
+- ✅ Conexão com PostgreSQL
+- ✅ Execução de queries PostgreSQL
+- ✅ Queries dos dispatchers (Contas a Receber, Contas a Pagar, Compras)
+- ✅ Cliente WhatsApp e status da instância
 
-Os testes são executados automaticamente:
-- ✅ A cada push para `main`, `master` ou `develop`
-- ✅ A cada pull request para essas branches
-- ✅ Diariamente às 6h UTC (3h BRT)
-- ✅ Manualmente via **Actions** > **Testes Automatizados** > **Run workflow**
+### Logs e Monitoramento
 
-### Testes Executados
-
-1. Importação de módulos
-2. Validação de configurações
-3. Conexão PostgreSQL
-4. Execução de queries PostgreSQL
-5. Busca de contas a receber
-6. Formatação de mensagens
-7. Cliente WhatsApp
-8. Configuração do agendador
+- **Logs detalhados** de todas as execuções
+- **Visualização em tempo real** no dashboard do Railway
+- **Status de sucesso/falha** de cada cron job
+- **Notificações Discord** em caso de falha no Health Check
 
 ### Notificações Discord
 
-Em caso de falha dos testes, uma notificação é enviada automaticamente para o Discord com:
-- 📋 Hash do commit
-- 👤 Autor e data do commit
-- 💬 Mensagem do commit
-- 📊 Resumo completo dos testes e erros
+Em caso de falha no Health Check, uma notificação é enviada automaticamente para o Discord com:
+- 📊 Resumo dos testes (passou/falhou)
+- 🔍 Lista de testes que falharam
+- 📋 Saída completa dos testes
+- ⏰ Timestamp da execução
 
-**Webhook Discord:** Configurado para enviar notificações com `@everyone` em caso de falha.
+**Configuração:** Adicione a variável `DISCORD_WEBHOOK_URL` no Railway.
 
-### Configuração dos Secrets
+### Visualizar Logs
 
-Para que os testes funcionem, configure os seguintes secrets no GitHub:
+1. Acesse seu projeto no Railway
+2. Vá em **Deployments** ou clique no serviço
+3. Veja os logs em tempo real
+4. Para logs de cron jobs, vá em **Cron Jobs** ou **Scheduled Tasks**
 
-1. Vá em **Settings** > **Secrets and variables** > **Actions**
-2. Adicione os secrets necessários (veja detalhes em [.github/README.md](.github/README.md))
+### Testar Manualmente
 
-**Secrets Obrigatórios:**
-- `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
-- `EVOLUTION_API_URL`, `EVOLUTION_API_KEY`, `EVOLUTION_INSTANCE`
-- `DISCORD_WEBHOOK_URL` - URL do webhook Discord
-- `WHATSAPP_NUMBER` (opcional)
+Você pode executar o Health Check manualmente:
 
-### Visualizar Resultados
+```bash
+python scripts/health_check.py
+```
 
-1. Vá em **Actions** no repositório GitHub
-2. Clique no workflow **Testes Automatizados**
-3. Veja os logs detalhados de cada teste
-4. Baixe os artefatos com os resultados completos
+Ou no Railway: vá em **Cron Jobs** → **Health Check** → **Run Now**
+
+**📚 Veja o guia completo em:** [MONITORAMENTO_RAILWAY.md](MONITORAMENTO_RAILWAY.md)
 
 ## 🐛 Solução de Problemas
 
