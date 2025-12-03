@@ -1,14 +1,15 @@
-# Sistema de Notificação de Contas a Receber via WhatsApp
+# Sistema de Notificações Odoo via WhatsApp
 
-Sistema automatizado que dispara notificações via WhatsApp sobre contas a receber com vencimento próximo usando a Evolution API.
+Sistema automatizado que dispara notificações via WhatsApp sobre contas a receber, contas a pagar e compras do Odoo usando a Evolution API. As tarefas são executadas via cron jobs do Railway.
 
 ## 🚀 Funcionalidades
 
-- ✅ Disparo automático de contas a receber com vencimento para hoje (07:00)
-- ✅ Disparo automático de contas a receber com vencimento para amanhã (17:30)
-- ✅ Notificações formatadas com informações detalhadas
+- ✅ **Contas a Receber**: Disparo automático de contas com vencimento para hoje (07:30)
+- ✅ **Contas a Pagar**: Resumo de contas com vencimento para hoje, agrupado por empresa (07:30)
+- ✅ **Compras**: Resumo de compras atualizadas no dia com status (17:30)
 - ✅ Integração direta com PostgreSQL do Odoo
-- ✅ Configurado para deploy no Railway
+- ✅ Notificações formatadas com informações detalhadas
+- ✅ Configurado para deploy no Railway com cron jobs
 - ✅ Logging completo de todas as operações
 - ✅ Testes automatizados via GitHub Actions
 - ✅ Notificações Discord em caso de falha dos testes
@@ -19,6 +20,7 @@ Sistema automatizado que dispara notificações via WhatsApp sobre contas a rece
 - Acesso ao banco PostgreSQL do Odoo
 - Conta na Evolution API com instância configurada
 - Número de WhatsApp para receber notificações
+- Conta no Railway para hospedagem e cron jobs
 
 ## 🔧 Instalação
 
@@ -51,22 +53,32 @@ WHATSAPP_NUMBER=5511999999999
 
 ## 🏃 Execução Local
 
-Execute o sistema:
+### Testar Scripts Individualmente
+
+Você pode testar cada script separadamente:
+
+```bash
+# Contas a receber (vencimento hoje)
+python scripts/dispatch_receivables_today.py
+
+# Contas a pagar (vencimento hoje)
+python scripts/dispatch_payables_today.py
+
+# Compras atualizadas no dia
+python scripts/dispatch_purchases.py
+```
+
+### Executar Serviço Principal
+
+O `main.py` mantém o processo rodando (útil para o Railway):
 
 ```bash
 python main.py
 ```
 
-O sistema irá:
-1. Conectar ao PostgreSQL do Odoo
-2. Verificar o status da instância WhatsApp
-3. Agendar os disparos automáticos:
-   - 07:00: Contas a receber com vencimento para HOJE
-   - 17:30: Contas a receber com vencimento para AMANHÃ
-
 ## 🚂 Deploy no Railway
 
-### Configuração
+### Configuração Básica
 
 1. Acesse [Railway.app](https://railway.app)
 2. Crie um novo projeto e conecte seu repositório
@@ -74,19 +86,44 @@ O sistema irá:
 
 **Variáveis de Ambiente Obrigatórias:**
 - `ODOO_URL` - URL do PostgreSQL (ex: http://62.72.8.92:5432)
-- `ODOO_DB` - Nome do banco de dados
-- `ODOO_USERNAME` - Usuário do banco
-- `ODOO_PASSWORD` - Senha do banco
+- `ODOO_DB` ou `POSTGRES_DB` - Nome do banco de dados
+- `ODOO_USERNAME` ou `POSTGRES_USER` - Usuário do banco
+- `ODOO_PASSWORD` ou `POSTGRES_PASSWORD` - Senha do banco
 - `EVOLUTION_API_KEY` - Chave da API Evolution
 - `EVOLUTION_API_URL` - URL da API Evolution
 - `EVOLUTION_INSTANCE` - Nome da instância
 - `WHATSAPP_NUMBER` - Número para receber notificações
 
-O Railway detectará automaticamente que é um projeto Python e fará o deploy.
+### Configuração de Cron Jobs
+
+O Railway usa cron jobs para executar tarefas agendadas. Veja detalhes completos em [RAILWAY_CRON_SETUP.md](RAILWAY_CRON_SETUP.md).
+
+**Resumo rápido:**
+
+1. Acesse **Settings** → **Cron Jobs** no Railway
+2. Configure 3 cron jobs:
+
+   **Cron Job 1: Contas a Receber**
+   - **Schedule**: `30 10 * * *` (7:30 AM horário de Brasília = 10:30 UTC)
+   - **Command**: `python scripts/dispatch_receivables_today.py`
+
+   **Cron Job 2: Contas a Pagar**
+   - **Schedule**: `30 10 * * *` (7:30 AM horário de Brasília = 10:30 UTC)
+   - **Command**: `python scripts/dispatch_payables_today.py`
+
+   **Cron Job 3: Compras**
+   - **Schedule**: `30 20 * * *` (5:30 PM horário de Brasília = 8:30 PM UTC)
+   - **Command**: `python scripts/dispatch_purchases.py`
+
+**⚠️ Importante:** Os horários estão em UTC. Ajuste conforme o fuso horário do Railway.
+
+### Arquivo railway.toml (Opcional)
+
+Você pode criar um arquivo `railway.toml` na raiz do projeto. Veja exemplo em `railway.toml.example`.
 
 ## 📱 Formato das Notificações
 
-As notificações enviadas via WhatsApp seguem este formato:
+### Contas a Receber
 
 ```
 📋 *Contas a Receber - Vencimento HOJE*
@@ -108,17 +145,54 @@ As notificações enviadas via WhatsApp seguem este formato:
 ⚠️ Total a receber hoje: R$ 5.000,00
 ```
 
+### Contas a Pagar
+
+```
+💰 *Contas a Pagar - Hoje*
+📅 03/12/2024
+📊 15 conta(s) | 3 empresa(s)
+💵 Total: R$ 25.000,00
+
+*Resumo por Empresa:*
+• *Empresa A*: R$ 15.000,00 (8 contas)
+• *Empresa B*: R$ 7.500,00 (5 contas)
+• *Empresa C*: R$ 2.500,00 (2 contas)
+
+⚠️ Total: R$ 25.000,00
+```
+
+### Compras Atualizadas
+
+```
+🛒 *Compras Atualizadas - Hoje*
+📅 Data: 03/12/2024
+📊 Total de compras: 5
+💰 Valor total: R$ 10.500,00
+
+*✅ Aprovado: 3 compra(s)*
+──────────────────────────────
+1. *P04303*
+   Fornecedor: LOJA DO EPI
+   Data: 26/11/2024
+   Valor: R$ 626,35
+
+...
+```
+
 ## ⏰ Horários dos Disparos
 
-- **07:00**: Envia notificação de contas a receber com vencimento para HOJE
-- **17:30**: Envia notificação de contas a receber com vencimento para AMANHÃ
+- **07:30** (horário de Brasília): 
+  - Contas a receber com vencimento para HOJE
+  - Contas a pagar com vencimento para HOJE
+- **17:30** (horário de Brasília): 
+  - Compras atualizadas no dia
 
 ## 🔍 Monitoramento
 
 O sistema mantém logs detalhados:
-- Logs são salvos em `accounts_receivable_notifier.log`
-- Também são exibidos no console
-- No Railway, os logs podem ser visualizados no painel
+- Logs são exibidos no console/stdout
+- No Railway, os logs podem ser visualizados no painel de cada cron job
+- Logs incluem informações sobre conexões, buscas e envios
 
 ## 🧪 Testes Automatizados
 
@@ -189,28 +263,42 @@ Para que os testes funcionem, configure os seguintes secrets no GitHub:
 - Verifique o formato do número (deve ser: 5511999999999, sem espaços)
 - Confirme que a instância está conectada ao WhatsApp
 
+### Cron Jobs Não Executando
+
+- Verifique os logs do cron job no Railway
+- Confirme que o horário está correto (lembre-se do fuso UTC)
+- Verifique se o comando está correto
+- Teste o script localmente primeiro
+
 ## 📝 Estrutura do Projeto
 
 ```
 tecfund_services/
-├── main.py                          # Sistema principal
+├── main.py                          # Serviço principal (mantém processo ativo)
 ├── config.py                        # Configurações e variáveis de ambiente
 ├── postgres_client.py               # Cliente PostgreSQL
 ├── whatsapp_client.py               # Cliente Evolution API
 ├── accounts_receivable_dispatcher.py # Módulo de disparo de contas a receber
-├── scripts/                         # Scripts de teste e utilitários
-│   ├── run_tests.py                # Script de testes automatizados
-│   └── send_discord_notification.py # Script de notificação Discord
+├── accounts_payable_dispatcher.py   # Módulo de disparo de contas a pagar
+├── purchases_dispatcher.py          # Módulo de disparo de compras
+├── scripts/                         # Scripts executáveis e utilitários
+│   ├── dispatch_receivables_today.py # Script para cron: contas a receber
+│   ├── dispatch_payables_today.py    # Script para cron: contas a pagar
+│   ├── dispatch_purchases.py         # Script para cron: compras
+│   ├── run_tests.py                  # Script de testes automatizados
+│   └── send_discord_notification.py  # Script de notificação Discord
 ├── .github/
 │   ├── workflows/
-│   │   └── test.yml                # Workflow do GitHub Actions
-│   └── README.md                   # Documentação dos testes
-├── requirements.txt                 # Dependências Python
-├── Procfile                        # Configuração para Railway
-├── runtime.txt                     # Versão do Python
-├── .env                            # Arquivo de configuração (não commitado)
-├── .gitignore                      # Arquivos ignorados pelo Git
-└── README.md                       # Esta documentação
+│   │   └── test.yml                  # Workflow do GitHub Actions
+│   └── README.md                     # Documentação dos testes
+├── requirements.txt                  # Dependências Python
+├── Procfile                          # Configuração para Railway
+├── runtime.txt                       # Versão do Python
+├── railway.toml.example              # Exemplo de configuração Railway
+├── RAILWAY_CRON_SETUP.md            # Guia de configuração dos cron jobs
+├── .env                             # Arquivo de configuração (não commitado)
+├── .gitignore                       # Arquivos ignorados pelo Git
+└── README.md                        # Esta documentação
 ```
 
 ## 📄 Licença

@@ -5,8 +5,6 @@ Dispara notificações de contas a receber com vencimento próximo
 import logging
 from datetime import datetime, timedelta, date
 from typing import List, Dict, Optional
-import schedule
-import time
 
 from config import (
     POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB,
@@ -187,55 +185,16 @@ class AccountsReceivableDispatcher:
             return False
     
     def dispatch_today_receivables(self):
-        """Dispara notificação de contas a receber com vencimento para hoje (7h)"""
+        """Dispara notificação de contas a receber com vencimento para hoje"""
         today = date.today()
         logger.info(f"Disparando contas a receber com vencimento para hoje ({today})")
-        self.send_accounts_receivable_notification(today, is_today=True)
+        return self.send_accounts_receivable_notification(today, is_today=True)
     
     def dispatch_tomorrow_receivables(self):
-        """Dispara notificação de contas a receber com vencimento para amanhã (17:30)"""
+        """Dispara notificação de contas a receber com vencimento para amanhã"""
         tomorrow = date.today() + timedelta(days=1)
         logger.info(f"Disparando contas a receber com vencimento para amanhã ({tomorrow})")
-        self.send_accounts_receivable_notification(tomorrow, is_today=False)
-    
-    def schedule_dispatches(self):
-        """
-        Agenda os disparos automáticos
-        - 7h: contas a receber com vencimento para hoje
-        - 17:30: contas a receber com vencimento para amanhã
-        """
-        logger.info("Agendando disparos de contas a receber...")
-        
-        # Agenda disparo das 7h (contas que vencem hoje)
-        schedule.every().day.at("07:00").do(self.dispatch_today_receivables)
-        logger.info("Disparo das 7h agendado: contas a receber com vencimento para hoje")
-        
-        # Agenda disparo das 17:30 (contas que vencem amanhã)
-        schedule.every().day.at("17:30").do(self.dispatch_tomorrow_receivables)
-        logger.info("Disparo das 17:30 agendado: contas a receber com vencimento para amanhã")
-        
-        logger.info("Agendamentos configurados com sucesso")
-    
-    def run_scheduler(self):
-        """
-        Executa o agendador em loop
-        Deve ser executado em thread separada ou processo separado
-        """
-        logger.info("Iniciando agendador de contas a receber...")
-        
-        # Agenda os disparos
-        self.schedule_dispatches()
-        
-        logger.info("Agendador rodando. Verificando agendamentos a cada minuto...")
-        
-        try:
-            while True:
-                schedule.run_pending()
-                time.sleep(60)  # Verifica a cada minuto
-        except KeyboardInterrupt:
-            logger.info("Agendador interrompido pelo usuário")
-        except Exception as e:
-            logger.error(f"Erro no agendador: {e}", exc_info=True)
+        return self.send_accounts_receivable_notification(tomorrow, is_today=False)
     
     def close(self):
         """Fecha conexões"""
@@ -249,70 +208,5 @@ class AccountsReceivableDispatcher:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit"""
         self.close()
-
-
-def test_dispatcher():
-    """Função de teste para o dispatcher"""
-    print("\n" + "=" * 80)
-    print("TESTE DO DISPATCHER DE CONTAS A RECEBER")
-    print("=" * 80)
-    
-    try:
-        dispatcher = AccountsReceivableDispatcher()
-        
-        # Testa busca de contas para hoje
-        print("\n1. Testando busca de contas a receber para HOJE...")
-        today = date.today()
-        accounts_today = dispatcher.get_accounts_receivable_by_due_date(today)
-        print(f"   Encontradas: {len(accounts_today)} conta(s)")
-        
-        if accounts_today:
-            print("\n   Contas encontradas:")
-            for acc in accounts_today[:5]:  # Mostra as 5 primeiras
-                partner = acc.get('partner_name', 'N/A')
-                amount = acc.get('amount_residual') or acc.get('debit', 0)
-                print(f"   - {partner}: R$ {amount:,.2f}")
-        
-        # Testa busca de contas para amanhã
-        print("\n2. Testando busca de contas a receber para AMANHÃ...")
-        tomorrow = date.today() + timedelta(days=1)
-        accounts_tomorrow = dispatcher.get_accounts_receivable_by_due_date(tomorrow)
-        print(f"   Encontradas: {len(accounts_tomorrow)} conta(s)")
-        
-        if accounts_tomorrow:
-            print("\n   Contas encontradas:")
-            for acc in accounts_tomorrow[:5]:  # Mostra as 5 primeiras
-                partner = acc.get('partner_name', 'N/A')
-                amount = acc.get('amount_residual') or acc.get('debit', 0)
-                print(f"   - {partner}: R$ {amount:,.2f}")
-        
-        # Testa formatação de mensagem
-        print("\n3. Testando formatação de mensagem...")
-        if accounts_today:
-            message = dispatcher.format_accounts_receivable_message(accounts_today, today, is_today=True)
-            print("\n   Mensagem formatada:")
-            print("   " + "-" * 76)
-            for line in message.split('\n'):
-                print(f"   {line}")
-            print("   " + "-" * 76)
-        
-        dispatcher.close()
-        print("\n✅ Teste concluído com sucesso!")
-        
-    except Exception as e:
-        print(f"\n❌ Erro durante o teste: {e}")
-        import traceback
-        traceback.print_exc()
-
-
-if __name__ == "__main__":
-    # Configura logging para teste
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    
-    # Executa teste
-    test_dispatcher()
 
 

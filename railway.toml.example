@@ -1,0 +1,25 @@
+# Exemplo de configuração do Railway
+# Copie para railway.toml ou configure via interface web
+
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "python main.py"
+
+# Cron Jobs - Horários em UTC
+# 7:30 AM horário de Brasília (UTC-3) = 10:30 UTC
+# 5:30 PM horário de Brasília (UTC-3) = 8:30 PM UTC
+
+[[cron]]
+schedule = "30 10 * * *"
+command = "python scripts/dispatch_receivables_today.py"
+
+[[cron]]
+schedule = "30 10 * * *"
+command = "python scripts/dispatch_payables_today.py"
+
+[[cron]]
+schedule = "30 20 * * *"
+command = "python scripts/dispatch_purchases.py"
+
