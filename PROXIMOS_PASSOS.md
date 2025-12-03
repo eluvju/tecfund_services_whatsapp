@@ -88,8 +88,6 @@ No projeto criado no Railway:
 
 ```
 ODOO_URL=http://62.72.8.92:5432
-POSTGRES_HOST=62.72.8.92
-POSTGRES_PORT=5432
 POSTGRES_DB=odoo
 POSTGRES_USER=XYZ
 POSTGRES_PASSWORD=XYZ
@@ -100,6 +98,10 @@ EVOLUTION_INSTANCE=brainess
 
 WHATSAPP_NUMBER=5511999999999
 ```
+
+**ℹ️ NOTA:** 
+- O `ODOO_URL` já contém o host e a porta - eles são extraídos automaticamente
+- `POSTGRES_HOST` e `POSTGRES_PORT` são opcionais (apenas se quiser sobrescrever os valores do `ODOO_URL`)
 
 **⚠️ IMPORTANTE:** Substitua os valores pelos seus dados reais!
 

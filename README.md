@@ -85,7 +85,7 @@ python main.py
 3. Configure as variáveis de ambiente no painel do Railway
 
 **Variáveis de Ambiente Obrigatórias:**
-- `ODOO_URL` - URL do PostgreSQL (ex: http://62.72.8.92:5432)
+- `ODOO_URL` - URL do PostgreSQL (ex: http://62.72.8.92:5432) - **Host e porta são extraídos automaticamente**
 - `ODOO_DB` ou `POSTGRES_DB` - Nome do banco de dados
 - `ODOO_USERNAME` ou `POSTGRES_USER` - Usuário do banco
 - `ODOO_PASSWORD` ou `POSTGRES_PASSWORD` - Senha do banco
@@ -93,6 +93,10 @@ python main.py
 - `EVOLUTION_API_URL` - URL da API Evolution
 - `EVOLUTION_INSTANCE` - Nome da instância
 - `WHATSAPP_NUMBER` - Número para receber notificações
+
+**Variáveis Opcionais (para override):**
+- `POSTGRES_HOST` - Sobrescreve o host extraído do `ODOO_URL`
+- `POSTGRES_PORT` - Sobrescreve a porta extraída do `ODOO_URL`
 
 ### Configuração de Cron Jobs
 
