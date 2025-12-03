@@ -107,40 +107,31 @@ WHATSAPP_NUMBER=5511999999999
 
 ### 6. Configurar Cron Jobs no Railway
 
-O Railway permite configurar cron jobs de duas formas. Veja o guia completo em [RAILWAY_CRON_SETUP.md](RAILWAY_CRON_SETUP.md).
+⚠️ **IMPORTANTE:** O Railway permite apenas **1 cron job** via interface web. Para múltiplos cron jobs, você **deve usar** o arquivo `railway.toml`.
 
-#### Opção A: Via Interface Web (Recomendado)
+O arquivo `railway.toml` já foi criado com os 3 cron jobs configurados!
 
-1. No projeto Railway, vá em **Settings**
-2. Procure por **Cron Jobs** ou **Scheduled Tasks**
-3. Clique em **Add Cron Job** ou **New Cron**
-4. Configure os 3 cron jobs:
+**Passos:**
 
-   **Cron Job 1: Contas a Receber**
-   - **Name**: `Contas a Receber - 7:30`
-   - **Schedule**: `30 10 * * *` (7:30 AM BRT = 10:30 UTC)
-   - **Command**: `python scripts/dispatch_receivables_today.py`
+1. Faça commit e push do arquivo `railway.toml`:
+   ```bash
+   git add railway.toml
+   git commit -m "feat: Adiciona configuração de múltiplos cron jobs via railway.toml"
+   git push
+   ```
 
-   **Cron Job 2: Contas a Pagar**
-   - **Name**: `Contas a Pagar - 7:30`
-   - **Schedule**: `30 10 * * *` (7:30 AM BRT = 10:30 UTC)
-   - **Command**: `python scripts/dispatch_payables_today.py`
+2. O Railway detectará automaticamente e criará os 3 cron jobs:
+   - **7:30 AM** (10:30 UTC): Contas a Receber
+   - **7:30 AM** (10:30 UTC): Contas a Pagar  
+   - **5:30 PM** (20:30 UTC): Compras Atualizadas
 
-   **Cron Job 3: Compras**
-   - **Name**: `Compras Atualizadas - 17:30`
-   - **Schedule**: `30 20 * * *` (5:30 PM BRT = 8:30 PM UTC)
-   - **Command**: `python scripts/dispatch_purchases.py`
+3. Verifique em **Settings** → **Cron Jobs** no Railway após o deploy
 
-#### Opção B: Via arquivo railway.toml
-
-1. Copie o arquivo `railway.toml.example` para `railway.toml`
-2. Ajuste os horários se necessário
-3. Faça commit e push
-4. O Railway detectará automaticamente
-
-**⚠️ Nota sobre horários:** O Railway usa UTC. Se estiver em horário de verão (UTC-2), ajuste:
+**⚠️ Nota sobre horários:** O Railway usa UTC. Se estiver em horário de verão (UTC-2), ajuste no `railway.toml`:
 - 7:30 BRT = 9:30 UTC → `30 9 * * *`
 - 17:30 BRT = 19:30 UTC → `30 19 * * *`
+
+Veja o guia completo em [RAILWAY_CRON_SETUP.md](RAILWAY_CRON_SETUP.md).
 
 ---
 

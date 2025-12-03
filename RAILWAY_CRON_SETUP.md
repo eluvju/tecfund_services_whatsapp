@@ -18,31 +18,56 @@ Este projeto usa cron jobs do Railway para executar tarefas agendadas. Cada scri
 
 ## Como Configurar no Railway
 
-### Opção 1: Via Interface Web do Railway (Recomendado)
+### ⚠️ Importante: Múltiplos Cron Jobs
+
+O Railway permite apenas **1 cron job** via interface web. Para configurar múltiplos cron jobs, você **deve usar** o arquivo `railway.toml`.
+
+### Método Recomendado: Via Arquivo `railway.toml`
+
+O arquivo `railway.toml` já foi criado na raiz do projeto com os 3 cron jobs configurados. Após fazer commit e push, o Railway detectará automaticamente e criará os cron jobs.
+
+**O arquivo `railway.toml` contém:**
+
+```toml
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "python main.py"
+
+# Cron Jobs - Horários em UTC
+# 7:30 AM horário de Brasília (UTC-3) = 10:30 UTC
+# 5:30 PM horário de Brasília (UTC-3) = 8:30 PM UTC
+
+[[cron]]
+schedule = "30 10 * * *"
+command = "python scripts/dispatch_receivables_today.py"
+
+[[cron]]
+schedule = "30 10 * * *"
+command = "python scripts/dispatch_payables_today.py"
+
+[[cron]]
+schedule = "30 20 * * *"
+command = "python scripts/dispatch_purchases.py"
+```
+
+**Passos:**
+1. Faça commit e push do arquivo `railway.toml`
+2. O Railway fará um novo deploy automaticamente
+3. Os 3 cron jobs serão criados automaticamente
+4. Verifique em **Settings** → **Cron Jobs** (ou na seção de cron jobs do projeto)
+
+### Método Alternativo: Via Interface Web (Apenas 1 Cron Job)
+
+**⚠️ Limitação:** O Railway permite apenas **1 cron job** via interface web.
+
+Se precisar configurar apenas 1 cron job temporariamente:
 
 1. Acesse seu projeto no Railway
 2. Vá em **Settings** → **Cron Jobs** (ou **Scheduled Tasks**)
 3. Clique em **Add Cron Job**
-4. Configure cada cron job:
-
-   **Cron Job 1: Contas a Receber**
-   - **Name**: `Contas a Receber - 7:30`
-   - **Schedule**: `30 10 * * *` (7:30 AM horário de Brasília = 10:30 UTC)
-   - **Command**: `python scripts/dispatch_receivables_today.py`
-   
-   **Cron Job 2: Contas a Pagar**
-   - **Name**: `Contas a Pagar - 7:30`
-   - **Schedule**: `30 10 * * *` (7:30 AM horário de Brasília = 10:30 UTC)
-   - **Command**: `python scripts/dispatch_payables_today.py`
-   
-   **Cron Job 3: Compras**
-   - **Name**: `Compras Atualizadas - 17:30`
-   - **Schedule**: `30 20 * * *` (5:30 PM horário de Brasília = 8:30 PM UTC)
-   - **Command**: `python scripts/dispatch_purchases.py`
-
-### Opção 2: Via Arquivo `railway.toml`
-
-Crie um arquivo `railway.toml` na raiz do projeto:
+4. Configure o cron job:
 
 ```toml
 [build]
